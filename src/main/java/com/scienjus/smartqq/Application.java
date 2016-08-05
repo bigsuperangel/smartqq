@@ -1,5 +1,6 @@
 package com.scienjus.smartqq;
 
+import com.fj.robot.Robot;
 import com.scienjus.smartqq.callback.MessageCallback;
 import com.scienjus.smartqq.client.SmartQQClient;
 import com.scienjus.smartqq.model.*;
@@ -12,10 +13,11 @@ import java.util.List;
  * @date 2015/12/18.
  */
 public class Application {
+    public static SmartQQClient client = null;
 
     public static void main(String[] args) {
         //创建一个新对象时需要扫描二维码登录，并且传一个处理接收到消息的回调，如果你不需要接收消息，可以传null
-        SmartQQClient client = new SmartQQClient(new MessageCallback() {
+        client = new SmartQQClient(new MessageCallback() {
             @Override
             public void onMessage(Message message) {
                 System.out.println(message.getContent());
@@ -24,6 +26,8 @@ public class Application {
             @Override
             public void onGroupMessage(GroupMessage message) {
                 System.out.println(message.getContent());
+                String reply = Robot.tuling(message.getContent(),message.getUserId()+"");
+                client.sendMessageToGroup(message.getGroupId(),reply);
             }
 
             @Override

@@ -6,16 +6,21 @@ import com.alibaba.fastjson.JSONObject;
 import com.scienjus.smartqq.callback.MessageCallback;
 import com.scienjus.smartqq.constant.ApiURL;
 import com.scienjus.smartqq.model.*;
+import com.scienjus.smartqq.model.Font;
+import com.scienjus.smartqq.util.QRCodeFrame;
 import net.dongliu.requests.Client;
 import net.dongliu.requests.Response;
 import net.dongliu.requests.Session;
 import net.dongliu.requests.exception.RequestException;
 import org.apache.log4j.Logger;
 
+import javax.swing.*;
+import java.awt.*;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.List;
 
 /**
  * Api客户端.
@@ -52,6 +57,8 @@ public class SmartQQClient implements Closeable {
 
     //线程开关
     private volatile boolean pollStarted;
+
+    private QRCodeFrame qrCodeFrame = null;
 
     public SmartQQClient(final MessageCallback callback) {
         this.client = Client.pooled().maxPerRoute(5).maxTotal(10).build();
@@ -103,6 +110,27 @@ public class SmartQQClient implements Closeable {
                 .addHeader("User-Agent", ApiURL.USER_AGENT)
                 .file(filePath);
         LOGGER.info("二维码已保存在 " + filePath + " 文件中，请打开手机QQ并扫描二维码");
+
+        EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                try {
+                    UIManager.setLookAndFeel("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
+                    qrCodeFrame = new QRCodeFrame("qrcode.png");
+                } catch (Exception e) {
+                    LOGGER.error("open qrcode error",e);
+                }
+            }
+        });
+    }
+
+    private void closeQrCodeFrame(QRCodeFrame qrCodeFrame){
+        if(null!=qrCodeFrame){
+            try {
+                qrCodeFrame.dispose();
+            }catch (Exception e){
+                LOGGER.error("close qrcode error",e);
+            }
+        }
     }
 
     //登录流程2：校验二维码
@@ -115,6 +143,7 @@ public class SmartQQClient implements Closeable {
             Response<String> response = get(ApiURL.VERIFY_QR_CODE);
             String result = response.getBody();
             if (result.contains("成功")) {
+                this.closeQrCodeFrame(qrCodeFrame);
                 for (String content : result.split("','")) {
                     if (content.startsWith("http")) {
                         LOGGER.info("正在登录，请稍后");
@@ -123,6 +152,7 @@ public class SmartQQClient implements Closeable {
                     }
                 }
             } else if (result.contains("已失效")) {
+                this.closeQrCodeFrame(qrCodeFrame);
                 LOGGER.info("二维码已失效，尝试重新获取二维码");
                 getQRCode();
             }

@@ -5,7 +5,6 @@ import com.scienjus.smartqq.callback.MessageCallback;
 import com.scienjus.smartqq.client.SmartQQClient;
 import com.scienjus.smartqq.model.*;
 
-import java.io.IOException;
 import java.util.List;
 
 /**

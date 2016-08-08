@@ -21,18 +21,22 @@ public class Application {
             @Override
             public void onMessage(Message message) {
                 System.out.println(message.getContent());
+                String reply = Robot.xiaodoubi(message.getContent());
+                client.sendMessageToGroup(message.getUserId(),reply);
             }
 
             @Override
             public void onGroupMessage(GroupMessage message) {
                 System.out.println(message.getContent());
-                String reply = Robot.tuling(message.getContent(),message.getUserId()+"");
+                String reply = Robot.xiaodoubi(message.getContent());
                 client.sendMessageToGroup(message.getGroupId(),reply);
             }
 
             @Override
             public void onDiscussMessage(DiscussMessage message) {
                 System.out.println(message.getContent());
+                String reply = Robot.xiaodoubi(message.getContent());
+                client.sendMessageToGroup(message.getDiscussId(),reply);
             }
         });
         //登录成功后便可以编写你自己的业务逻辑了

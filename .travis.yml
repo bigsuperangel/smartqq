@@ -1,4 +1,10 @@
 language: java
 
 jdk:
+  - oraclejdk7
   - oraclejdk8
+
+before_install:
+  - export BUILD_COVERAGE="$([ $TRAVIS_JDK_VERSION == 'oraclejdk8' ] && echo 'true')"
+install: echo "No need to run mvn install -DskipTests then mvn install.  Running mvn install."
+script: mvn install
